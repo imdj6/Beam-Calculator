@@ -14,10 +14,10 @@ import DropDownPicker from "react-native-dropdown-picker";
 const HomeScreen = () => {
   
   
- 
-
-
-
+  const [ast1,setAst1]=useState();
+  const [astdouble,setAstdouble]=useState();
+  const [ast2,setAst2]=useState();
+  const [asc,setAsc]=useState();
   const [m,setM]=useState();
   const [dc,setDc]=useState();
   const [dt,setDt]=useState();
@@ -29,18 +29,18 @@ const HomeScreen = () => {
   const [fy, setFy] = useState(null);
   const [ast,setAst]=useState();
   const [items1, setItems1] = useState([
-    { label: "M-10", value: "10" },
-    { label: "M-15", value: "15" },  
-    { label: "M-20", value: "20" },
-    { label: "M-25", value: "25" },
-    { label: "M-30", value: "30" },
-    { label: "M-35", value: "35" },
-    { label: "M-40", value: "40" },
+    { label: "M-10", value: 10 },
+    { label: "M-15", value: 15 },  
+    { label: "M-20", value: 20 },
+    { label: "M-25", value: 25 },
+    { label: "M-30", value: 30 },
+    { label: "M-35", value: 35 },
+    { label: "M-40", value:40},
   ]);
   const [items2, setItems2] = useState([
-    { label: "Fe-415", value: "415" },
-    { label: "Fe-250", value: "250" },
-    { label: "Fe-500", value: "500" },
+    { label: "Fe-415", value: 415 },
+    { label: "Fe-250", value: 250 },
+    { label: "Fe-500", value: 500 },
   ]);
   const navigation = useNavigation();
   useLayoutEffect(() => {
@@ -93,6 +93,7 @@ const HomeScreen = () => {
 
   return (
     <>
+    <ScrollView>
      <View style={{
      }}>
       <View className="mt-3 ml-4 ">
@@ -110,7 +111,7 @@ const HomeScreen = () => {
                 value={fck}
                 items={items1}
                 setOpen={setOpen1}
-                setValue={setFck}
+                setValue={setFck  }
                 setItems={setItems1}
               />
             </View>
@@ -157,7 +158,7 @@ const HomeScreen = () => {
                   placeholder="in mm"
                   keyboardType="numeric"
                   onChangeText={
-                    newText=>setB(newText)
+                    newText=>setB(parseFloat(newText))
                   }
                 />
               </View>
@@ -175,7 +176,7 @@ const HomeScreen = () => {
                   placeholder="in mm"
                   keyboardType="numeric"
                   onChangeText={
-                    newText=>setDt(newText)
+                    newText=>setDt(parseFloat(newText))
                   }
                 />
               </View>
@@ -194,7 +195,7 @@ const HomeScreen = () => {
                   placeholder="in mm"
                   keyboardType="numeric"
                   onChangeText={
-                    newText=>setDc(newText)
+                    newText=>setDc(parseFloat(newText))
                   }
                 />
               </View>
@@ -213,7 +214,7 @@ const HomeScreen = () => {
                 placeholder="in mm"
                 keyboardType="numeric"
                 onChangeText={
-                  newText=>setD(newText)
+                  newText=>setD(parseFloat(newText))
                 }
               />
             </View>
@@ -244,7 +245,7 @@ const HomeScreen = () => {
                     placeholder="in kNm"
                     keyboardType="numeric"
                     onChangeText={
-                      newText=>setM(newText)
+                      newText=>setM(parseFloat(newText))
                     }
                   />
                 </View>
@@ -268,9 +269,9 @@ const HomeScreen = () => {
             <Button
               title="Submit"
               color="#0D98BA"
-              onPress={async () => {
-                const d=D-dt;
-                const mu=1.5*m;
+              onPress={ () => {
+                const d=(D)-(dt);
+                const mu=1.5*(m);
                 var c=0;
                 if(fy==250)
                 {
@@ -283,89 +284,119 @@ const HomeScreen = () => {
                 else{
                   c=0.46
                 }
-                const mulimit=0.36*c*((1-0.42)*c)*fck*b*d*d;
-                var ast1=0;
-                var mu1=0;
-                var fsc=0;
-                var dcbyd=0;
+                const mulimit=((0.36*c*(1-(parseFloat(0.42*c)))*fck*b*d*d)/(10**6));
                 if(mu<mulimit)
                 {
                   console.log("this is singly reinforced section");
-                  let c2=(0.45*fck)/fy*(1-Math.sqrt(1-((4.6*mu*10^6)/(fck*b*d*d))));
-                   setAst(c2);
+                  let c2=((0.5*fck)/fy)*(1-(Math.sqrt(1-((4.6*mu*(10**6))/(fck*b*d*d)))))*(b*d);
+                  // let c2=(0.5*fck)/(fy*(1-Math.sqrt(1-((4.6*mu*10^6)/(fck*b*d*d)))));
+                   setAst(parseFloat(c2));
+                   let ascsingly=0.002*b*D;
                    console.log("homescreen ast",ast);
                    navigation.navigate('singly',{
-                    ast:{ast},
+                    "ast":ast,
+                    "ascsingly":ascsingly,
+                     "breadth":b,
+                     "depth":D,
                    });
 
                 }
                 else if(mu>mulimit)
                 {
+                  console.log("mulimit",mulimit);
                   console.log("this is doubly reinforced section");
-                  ast1=(0.45*fck)/fy*(1-Math.sqrt(1-((4.6*mulimit*10^6)/(fck*b*d*d))));
-                  mu1=mu-mulimit;
-                  dcbyd=dc/d;
+                  let c3=((0.5*fck)/fy)*(1-(Math.sqrt(1-((4.6*mulimit*(10**6))/(fck*b*d*d)))))*(b*d);
+                  // setAst1((0.5*fck)/(fy*(1-Math.sqrt(1-((4.6*mulimit*10^6)/(fck*b*d*d))))));
+                  setAst1(parseFloat(c3));
+                  console.log("ast1",ast1);
+                  const mu1=mu-mulimit;
+                  const dcbyd=(parseFloat(parseFloat(dc)/parseFloat(d)));
+                  var fsc=0;
                   if(fy==250)
                   {
-                      if(0.04<dcbyd<0.06)
-                      {
-                        fsc=217.5;
-                      }
-                      else if(0.09<dcbyd<0.15)
-                      {
-                        fsc=217.5;
-                      }
-                      else if(0.10<dcbyd<0.15)
-                      {
-                        fsc=217.5;
-                      }
-                      else if(0.18<dcbyd<0.25)
-                      {
-                        fsc=217.5;
-                      }
+                      fsc=parseFloat(217.5);
                   }
                   else if(fy==415)
                   {
-                    if(0.04<dcbyd<0.06)
+                    if(0.05<dcbyd<0.1)
+                      {
+                        
+                        fsc=(parseFloat(355.1))+((((parseFloat(351.9))-(parseFloat(355.1)))/(parseFloat(0.05)))*(dcbyd-0.05));
+                      }
+                      else if(0.1<dcbyd<0.15)
+                      {
+                        fsc=(parseFloat(351.9))+((((parseFloat(342.4))-(parseFloat(351.9)))/(parseFloat(0.05)))*(dcbyd-0.1));
+                      }
+                      else if(0.15<dcbyd<0.20)
+                      {
+                        fsc=(parseFloat(342.4))+((((parseFloat(329.2))-(parseFloat(342.4)))/(parseFloat(0.05)))*(dcbyd-0.15))
+                      }
+                      else if(dcbyd==0.05)
                       {
                         fsc=355.1;
                       }
-                      else if(0.09<dcbyd<0.15)
+                      else if(dcbyd=0.1)
                       {
                         fsc=351.9;
                       }
-                      else if(0.10<dcbyd<0.15)
+                      else if(dcbyd=0.15)
                       {
                         fsc=342.4;
                       }
-                      else if(0.18<dcbyd<0.25)
+                      else if(dcbyd=0.20)
                       {
                         fsc=329.2;
                       }
                   }
                   else{
-                    if(0.04<dcbyd<0.06)
+                    if(0.05<dcbyd<0.1)
+                      {
+                        fsc=(parseFloat(423.9))+((((parseFloat(411.3))-(parseFloat(423.9)))/(parseFloat(0.05)))*(dcbyd-0.05))
+                      }
+                      else if(0.1<dcbyd<0.15)
+                      {
+                        fsc=(parseFloat(411.3))+((((parseFloat(395.1))-(parseFloat(411.3)))/(parseFloat(0.05)))*(dcbyd-0.1))
+                      }
+                      else if(0.15<dcbyd<0.20)
+                      {
+                        fsc=(parseFloat(395.1))+((((parseFloat(370.3))-(parseFloat(395.1)))/(parseFloat(0.05)))*(dcbyd-0.15))
+
+                      }
+                      else if(dcbyd==0.05)
                       {
                         fsc=423.9;
                       }
-                      else if(0.09<dcbyd<0.15)
+                      else if(dcbyd=0.1)
                       {
                         fsc=411.3;
                       }
-                      else if(0.10<dcbyd<0.15)
+                      else if(dcbyd=0.15)
                       {
                         fsc=395.1;
                       }
-                      else if(0.18<dcbyd<0.25)
+                      else if(dcbyd=0.20)
                       {
                         fsc=370.3;
                       }
+                      
                   }
-                  const asc=(mu1)/(fsc*(d-dc));
+                  console.log("fsc",fsc);
+                  console.log("Ast1",ast1);
+                  const asc=((mu1)*(10**6))/(fsc*(d-dc));
                   const ast2=(fsc*asc)/(0.87*fy);
-                  const astfordoub=ast1+ast2;
+                  console.log("ast2",ast2);
+                  const c4=parseFloat(parseFloat(ast1)+parseFloat(ast2));
+                  setAstdouble(c4);
+                  console.log(astdouble);
+                  console.log('asc is::',asc);
+                  console.log(ast2);
                   navigation.navigate("doubly",{
-                    ast
+                    "asc":asc,
+                    "ast2":ast2,
+                    "astfordouble":astdouble,
+                    "breadth":b,
+                    "depth":D,
+                    
                   })
                 }
                 console.log("width",b);
@@ -381,14 +412,14 @@ const HomeScreen = () => {
                 )
                 console.log("c",c);
                 console.log("mul",mulimit);
-                console.log(ast);
-                console.log(ast1);
+                              
               }}
             />
           </View>
         </View>
       </View>
     </View>
+    </ScrollView>
     </>
   );
 };
